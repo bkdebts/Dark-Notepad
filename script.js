@@ -99,18 +99,19 @@ function createNoteCard(note) {
     noteCard.innerHTML = `
         <div class="note-header">
             <div class="note-title">${note.title}</div>
-            <i class="material-icons favorite-btn ${note.isFavorite ? 'active' : ''}">${note.isFavorite ? 'favorite' : 'favorite_border'}</i>
+            <i class="fas ${note.isFavorite ? 'fa-heart' : 'fa-heart-crack'} favorite-btn ${note.isFavorite ? 'active' : ''}"></i>
         </div>
         <div class="note-content">${getContentPreview(note.content)}</div>
         ${note.tags.length > 0 ? `
             <div class="note-tags">
-                ${note.tags.map(tag => `<div class="note-tag">#${tag}</div>`).join('')}
+                ${note.tags.map(tag => `<div class="note-tag"><i class="fas fa-tag fa-flip-horizontal"></i> ${tag}</div>`).join('')}
             </div>
         ` : ''}
         <div class="note-footer">
-            <div class="note-date">${formatDate(note.modifiedAt)}</div>
+            <div class="note-date"><i class="far fa-clock"></i> ${formatDate(note.modifiedAt)}</div>
             <div class="note-actions">
-                <i class="material-icons">delete_outline</i>
+                <i class="fas fa-share-alt"></i>
+                <i class="fas fa-trash-alt"></i>
             </div>
         </div>
     `;
@@ -124,8 +125,16 @@ function createNoteCard(note) {
         toggleFavorite(note.id);
     });
     
-    const deleteBtn = noteCard.querySelector('.note-actions i');
-    deleteBtn.addEventListener('click', (e) => {
+    const actionBtns = noteCard.querySelectorAll('.note-actions i');
+    
+    // Share button
+    actionBtns[0].addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSnackbar('This is a demo version. Note sharing is not available.');
+    });
+    
+    // Delete button
+    actionBtns[1].addEventListener('click', (e) => {
         e.stopPropagation();
         showSnackbar('This is a demo version. Note deletion is not available.');
     });
@@ -171,7 +180,7 @@ function renderNotes() {
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-state';
         emptyState.innerHTML = `
-            <i class="material-icons">note_outlined</i>
+            <i class="fas fa-book-open"></i>
             <h2>${isSearchActive ? 'No results found' : 'No notes yet'}</h2>
             ${!isSearchActive ? '<p>Tap the + button to create a note</p>' : ''}
         `;
