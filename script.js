@@ -54,11 +54,43 @@ const notesContainer = document.getElementById('notes-container');
 const notesCountText = document.getElementById('notes-count-text');
 const addNoteBtn = document.getElementById('add-note-btn');
 
+// Modal elements
+const noteEditorModal = document.getElementById('note-editor-modal');
+const modalTitle = document.getElementById('modal-title');
+const noteTitle = document.getElementById('note-title');
+const noteContent = document.getElementById('note-content');
+const noteTags = document.getElementById('note-tags');
+const tagsPreview = document.getElementById('tags-preview');
+const noteFavorite = document.getElementById('note-favorite');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const saveNoteBtn = document.getElementById('save-note-btn');
+const cancelNoteBtn = document.getElementById('cancel-note-btn');
+const addTagBtn = document.getElementById('add-tag-btn');
+
+// Shopping List elements
+const shoppingListModal = document.getElementById('shopping-list-modal');
+const itemName = document.getElementById('item-name');
+const addItemBtn = document.getElementById('add-item-btn');
+const shoppingItems = document.getElementById('shopping-items');
+const clearItemsBtn = document.getElementById('clear-items-btn');
+const saveListBtn = document.getElementById('save-list-btn');
+const closeShoppingListBtn = document.getElementById('close-shopping-list-btn');
+
+// Drawer menu items
+const homeItem = document.getElementById('home-item');
+const favoritesItem = document.getElementById('favorites-item');
+const shoppingListItem = document.getElementById('shopping-list-item');
+const tagsItem = document.getElementById('tags-item');
+const themesItem = document.getElementById('themes-item');
+const settingsItem = document.getElementById('settings-item');
+
 // State variables
 let notes = [];
 let isSearchActive = false;
 let searchQuery = '';
 let isInitialized = false;
+let currentShoppingItems = [];
+let currentFilter = 'all'; // 'all', 'favorites'
 
 // Format date to "MMM DD, YYYY" format
 function formatDate(date) {
@@ -144,9 +176,131 @@ function createNoteCard(note) {
     return noteCard;
 }
 
-// Placeholder for note editor (to be implemented)
-function showEditNote(note) {
-    showSnackbar('Note editing coming soon!');
+// Show the note editor modal with note data
+function showEditNote(note = null) {
+    // Reset the form
+    resetNoteForm();
+    
+    // Set the modal title
+    modalTitle.textContent = note ? 'Edit Note' : 'Create New Note';
+    
+    // Populate form with note data if editing
+    if (note) {
+        noteTitle.value = note.title || '';
+        noteContent.value = note.content || '';
+        noteFavorite.checked = note.is_favorite || false;
+        
+        // Process tags
+        let tags = note.tags || [];
+        if (typeof tags === 'string') {
+            // Remove the curly braces and parse the tags
+            tags = tags.replace(/{|}/g, '').split(',').filter(tag => tag.trim() !== '');
+        }
+        
+        // Add tags to the preview
+        tags.forEach(tag => addTagToPreview(tag));
+    }
+    
+    // Show the modal
+    modalBackdrop.classList.remove('hidden');
+    noteEditorModal.classList.add('visible');
+    
+    // Focus on the title field
+    setTimeout(() => {
+        noteTitle.focus();
+    }, 300);
+}
+
+// Reset the note form
+function resetNoteForm() {
+    noteTitle.value = '';
+    noteContent.value = '';
+    noteTags.value = '';
+    noteFavorite.checked = false;
+    tagsPreview.innerHTML = '';
+}
+
+// Close the note editor modal
+function closeNoteEditor() {
+    noteEditorModal.classList.remove('visible');
+    modalBackdrop.classList.add('hidden');
+}
+
+// Add a tag to the preview
+function addTagToPreview(tagText) {
+    if (!tagText || tagText.trim() === '') return;
+    
+    // Check if tag already exists
+    const existingTags = Array.from(tagsPreview.querySelectorAll('.tag')).map(tag => 
+        tag.textContent.replace('close', '').trim()
+    );
+    
+    if (existingTags.includes(tagText.trim())) return;
+    
+    // Create tag element
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.innerHTML = `${tagText} <i class="fas fa-times"></i>`;
+    
+    // Add delete functionality
+    tag.querySelector('i').addEventListener('click', () => {
+        tag.remove();
+    });
+    
+    tagsPreview.appendChild(tag);
+}
+
+// Get tags from the preview
+function getTagsFromPreview() {
+    return Array.from(tagsPreview.querySelectorAll('.tag')).map(tag => 
+        tag.textContent.replace('close', '').trim()
+    );
+}
+
+// Save the note
+async function saveNote() {
+    const title = noteTitle.value.trim();
+    const content = noteContent.value.trim();
+    const isFavorite = noteFavorite.checked;
+    const tags = getTagsFromPreview();
+    
+    // Validate form
+    if (!title) {
+        showSnackbar('Please enter a title');
+        return;
+    }
+    
+    if (!content) {
+        showSnackbar('Please enter some content');
+        return;
+    }
+    
+    // Create note data
+    const noteData = {
+        title,
+        content,
+        is_favorite: isFavorite,
+        tags
+    };
+    
+    // Check if we're editing or creating
+    const noteId = noteEditorModal.dataset.noteId;
+    
+    try {
+        if (noteId) {
+            // Update existing note
+            await updateNote(noteId, noteData);
+        } else {
+            // Create new note
+            await createNote(noteData);
+        }
+        
+        // Close the modal
+        closeNoteEditor();
+    } catch (error) {
+        console.error('Error saving note:', error);
+        showSnackbar('Failed to save note');
+    }
 }
 
 // API Functions
@@ -292,19 +446,41 @@ function filterNotes() {
 
 // Render notes to the container
 function renderNotes() {
-    const filteredNotes = filterNotes();
+    // First apply search filter if active
+    let filteredNotes = filterNotes();
+    
+    // Then apply category filter
+    filteredNotes = applyFilter(filteredNotes);
+    
     notesContainer.innerHTML = '';
     
-    // Update notes count
+    // Update notes count and header text
     notesCountText.textContent = `${notes.length} Notes`;
+    const headerText = document.querySelector('header h1');
+    headerText.textContent = currentFilter === 'favorites' ? 'Favorites' : 'Notes';
     
     if (filteredNotes.length === 0) {
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-state';
+        
+        let emptyIcon = 'fa-book-open';
+        let emptyTitle = 'No notes yet';
+        let emptyMessage = 'Tap the + button to create a note';
+        
+        if (isSearchActive) {
+            emptyIcon = 'fa-search';
+            emptyTitle = 'No results found';
+            emptyMessage = '';
+        } else if (currentFilter === 'favorites') {
+            emptyIcon = 'fa-heart-broken';
+            emptyTitle = 'No favorite notes';
+            emptyMessage = 'Add notes to favorites to see them here';
+        }
+        
         emptyState.innerHTML = `
-            <i class="fas fa-book-open"></i>
-            <h2>${isSearchActive ? 'No results found' : 'No notes yet'}</h2>
-            ${!isSearchActive ? '<p>Tap the + button to create a note</p>' : ''}
+            <i class="fas ${emptyIcon}"></i>
+            <h2>${emptyTitle}</h2>
+            ${emptyMessage ? `<p>${emptyMessage}</p>` : ''}
         `;
         notesContainer.appendChild(emptyState);
     } else {
@@ -383,6 +559,196 @@ async function seedDatabaseIfEmpty() {
     }
 }
 
+// Shopping List Functions
+function showShoppingList() {
+    // Clear the items and reset the form
+    shoppingItems.innerHTML = '';
+    itemName.value = '';
+    
+    // Parse the shopping list from the notes
+    parseShoppingListItems();
+    
+    // Show the modal
+    modalBackdrop.classList.remove('hidden');
+    shoppingListModal.classList.add('visible');
+    
+    // Focus on the input field
+    setTimeout(() => {
+        itemName.focus();
+    }, 300);
+}
+
+function closeShoppingList() {
+    shoppingListModal.classList.remove('visible');
+    modalBackdrop.classList.add('hidden');
+}
+
+function parseShoppingListItems() {
+    // Find a note with title "Shopping List"
+    const shoppingListNote = notes.find(note => 
+        note.title.toLowerCase() === 'shopping list'
+    );
+    
+    if (!shoppingListNote) {
+        // No shopping list found, create an empty array
+        currentShoppingItems = [];
+        renderShoppingItems();
+        return;
+    }
+    
+    // Parse items from the note content
+    const content = shoppingListNote.content;
+    const lines = content.split('\n');
+    
+    currentShoppingItems = lines
+        .map(line => line.trim())
+        .filter(line => line.startsWith('-'))
+        .map(line => {
+            const itemText = line.substring(1).trim();
+            const isCompleted = itemText.startsWith('~') && itemText.endsWith('~');
+            const text = isCompleted 
+                ? itemText.substring(1, itemText.length - 1).trim()
+                : itemText;
+            
+            return {
+                text,
+                isCompleted
+            };
+        });
+    
+    renderShoppingItems();
+}
+
+function renderShoppingItems() {
+    shoppingItems.innerHTML = '';
+    
+    if (currentShoppingItems.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.innerHTML = `
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your shopping list is empty</h2>
+            <p>Add items above to get started</p>
+        `;
+        shoppingItems.appendChild(emptyState);
+        return;
+    }
+    
+    currentShoppingItems.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'shopping-item';
+        
+        itemElement.innerHTML = `
+            <div class="item-name ${item.isCompleted ? 'completed' : ''}">
+                <i class="fas ${item.isCompleted ? 'fa-check-circle' : 'fa-circle'}"></i>
+                ${item.text}
+            </div>
+            <div class="item-actions">
+                <i class="fas ${item.isCompleted ? 'fa-circle' : 'fa-check-circle'}"></i>
+                <i class="fas fa-trash-alt"></i>
+            </div>
+        `;
+        
+        // Toggle completion status
+        const toggleBtn = itemElement.querySelector('.item-actions i:first-child');
+        toggleBtn.addEventListener('click', () => {
+            currentShoppingItems[index].isCompleted = !item.isCompleted;
+            renderShoppingItems();
+        });
+        
+        // Delete item
+        const deleteBtn = itemElement.querySelector('.item-actions i:last-child');
+        deleteBtn.addEventListener('click', () => {
+            currentShoppingItems.splice(index, 1);
+            renderShoppingItems();
+        });
+        
+        // Toggle completion status by clicking on the item
+        const itemName = itemElement.querySelector('.item-name');
+        itemName.addEventListener('click', () => {
+            currentShoppingItems[index].isCompleted = !item.isCompleted;
+            renderShoppingItems();
+        });
+        
+        shoppingItems.appendChild(itemElement);
+    });
+}
+
+function addShoppingItem() {
+    const text = itemName.value.trim();
+    
+    if (!text) {
+        showSnackbar('Please enter an item');
+        return;
+    }
+    
+    currentShoppingItems.push({
+        text,
+        isCompleted: false
+    });
+    
+    itemName.value = '';
+    itemName.focus();
+    
+    renderShoppingItems();
+}
+
+function clearShoppingItems() {
+    if (!confirm('Are you sure you want to clear all items?')) {
+        return;
+    }
+    
+    currentShoppingItems = [];
+    renderShoppingItems();
+}
+
+async function saveShoppingList() {
+    // Format the content
+    const content = currentShoppingItems
+        .map(item => item.isCompleted 
+            ? `- ~${item.text}~` 
+            : `- ${item.text}`
+        )
+        .join('\n');
+    
+    // Find an existing shopping list note
+    const existingList = notes.find(note => 
+        note.title.toLowerCase() === 'shopping list'
+    );
+    
+    try {
+        if (existingList) {
+            // Update the existing note
+            await updateNote(existingList.id, {
+                ...existingList,
+                content
+            });
+        } else {
+            // Create a new note
+            await createNote({
+                title: 'Shopping List',
+                content,
+                is_favorite: false,
+                tags: ['shopping']
+            });
+        }
+        
+        closeShoppingList();
+        showSnackbar('Shopping list saved successfully');
+    } catch (error) {
+        console.error('Error saving shopping list:', error);
+        showSnackbar('Failed to save shopping list');
+    }
+}
+
+// Filter notes based on current filter
+function applyFilter(notes) {
+    if (currentFilter === 'favorites') {
+        return notes.filter(note => note.is_favorite);
+    }
+    return notes;
+}
+
 // Initialize the app
 async function initApp() {
     // Simulating splash screen delay
@@ -394,9 +760,13 @@ async function initApp() {
         }, 500); // Wait for fade out animation
     }, 2000); // Show splash for 2 seconds
     
-    // Event listeners
+    // Event listeners for drawer and search
     menuBtn.addEventListener('click', toggleDrawer);
-    modalBackdrop.addEventListener('click', toggleDrawer);
+    modalBackdrop.addEventListener('click', (e) => {
+        if (drawer.classList.contains('visible')) {
+            toggleDrawer();
+        }
+    });
     
     searchBtn.addEventListener('click', toggleSearch);
     closeSearchBtn.addEventListener('click', toggleSearch);
@@ -406,32 +776,81 @@ async function initApp() {
         renderNotes();
     });
     
+    // Add note button
     addNoteBtn.addEventListener('click', () => {
-        // Open a popup to create a new note
-        const noteTitle = prompt('Enter note title:');
-        if (noteTitle) {
-            const noteContent = prompt('Enter note content:');
-            if (noteContent) {
-                createNote({
-                    title: noteTitle,
-                    content: noteContent,
-                    is_favorite: false,
-                    color: '#121212',
-                    tags: []
-                });
+        showEditNote();
+    });
+    
+    // Note editor modal buttons
+    closeModalBtn.addEventListener('click', closeNoteEditor);
+    cancelNoteBtn.addEventListener('click', closeNoteEditor);
+    saveNoteBtn.addEventListener('click', saveNote);
+    
+    // Tags input
+    addTagBtn.addEventListener('click', () => {
+        const tagText = noteTags.value.trim();
+        if (tagText) {
+            addTagToPreview(tagText);
+            noteTags.value = '';
+            noteTags.focus();
+        }
+    });
+    
+    noteTags.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const tagText = noteTags.value.trim();
+            if (tagText) {
+                addTagToPreview(tagText);
+                noteTags.value = '';
             }
         }
     });
     
+    // Shopping List modal buttons
+    closeShoppingListBtn.addEventListener('click', closeShoppingList);
+    addItemBtn.addEventListener('click', addShoppingItem);
+    clearItemsBtn.addEventListener('click', clearShoppingItems);
+    saveListBtn.addEventListener('click', saveShoppingList);
+    
+    itemName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addShoppingItem();
+        }
+    });
+    
     // Initialize drawer items
-    const drawerItems = document.querySelectorAll('.drawer-item');
-    drawerItems.forEach(item => {
-        item.addEventListener('click', () => {
-            toggleDrawer();
-            if (item.textContent.trim() !== 'Home') {
-                showSnackbar(`${item.textContent.trim()} feature is not available in demo version.`);
-            }
-        });
+    homeItem.addEventListener('click', () => {
+        currentFilter = 'all';
+        renderNotes();
+        toggleDrawer();
+    });
+    
+    favoritesItem.addEventListener('click', () => {
+        currentFilter = 'favorites';
+        renderNotes();
+        toggleDrawer();
+    });
+    
+    shoppingListItem.addEventListener('click', () => {
+        toggleDrawer();
+        showShoppingList();
+    });
+    
+    tagsItem.addEventListener('click', () => {
+        toggleDrawer();
+        showSnackbar('Tags feature is coming soon!');
+    });
+    
+    themesItem.addEventListener('click', () => {
+        toggleDrawer();
+        showSnackbar('Themes feature is coming soon!');
+    });
+    
+    settingsItem.addEventListener('click', () => {
+        toggleDrawer();
+        showSnackbar('Settings feature is coming soon!');
     });
     
     // Seed database if empty, then fetch all notes
