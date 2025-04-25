@@ -76,6 +76,27 @@ const clearItemsBtn = document.getElementById('clear-items-btn');
 const saveListBtn = document.getElementById('save-list-btn');
 const closeShoppingListBtn = document.getElementById('close-shopping-list-btn');
 
+// Memory Note elements
+const memoryModal = document.getElementById('memory-modal');
+const memoryModalTitle = document.getElementById('memory-modal-title');
+const memoryTitle = document.getElementById('memory-title');
+const memoryContent = document.getElementById('memory-content');
+const memoryTags = document.getElementById('memory-tags');
+const memoryTagsPreview = document.getElementById('memory-tags-preview');
+const memoryFavorite = document.getElementById('memory-favorite');
+const imagesContainer = document.getElementById('images-container');
+const imageUpload = document.getElementById('image-upload');
+const closeMemoryBtn = document.getElementById('close-memory-btn');
+const saveMemoryBtn = document.getElementById('save-memory-btn');
+const cancelMemoryBtn = document.getElementById('cancel-memory-btn');
+const addMemoryTagBtn = document.getElementById('add-memory-tag-btn');
+
+// Note Type Selection Modal
+const noteTypeModal = document.getElementById('note-type-modal');
+const textNoteOption = document.getElementById('text-note-option');
+const memoryNoteOption = document.getElementById('memory-note-option');
+const closeNoteTypeBtn = document.getElementById('close-note-type-btn');
+
 // Drawer menu items
 const homeItem = document.getElementById('home-item');
 const favoritesItem = document.getElementById('favorites-item');
@@ -91,6 +112,7 @@ let searchQuery = '';
 let isInitialized = false;
 let currentShoppingItems = [];
 let currentFilter = 'all'; // 'all', 'favorites'
+let currentImages = []; // For memory notes
 
 // Format date to "MMM DD, YYYY" format
 function formatDate(date) {
@@ -110,7 +132,14 @@ function getContentPreview(content, maxLength = 100) {
 function createNoteCard(note) {
     const noteCard = document.createElement('div');
     noteCard.className = 'note-card';
+    
+    // If it's a memory note, add memory class
+    if (note.note_type === 'memory') {
+        noteCard.className += ' memory-card';
+    }
+    
     noteCard.dataset.id = note.id;
+    noteCard.dataset.type = note.note_type || 'text';
     
     // If the note has a custom color, apply it
     if (note.color !== '#121212') {
@@ -124,33 +153,81 @@ function createNoteCard(note) {
         tags = tags.replace(/{|}/g, '').split(',').filter(tag => tag.trim() !== '');
     }
     
+    // Convert database images array from string to actual array if needed
+    let images = note.images || [];
+    if (typeof images === 'string') {
+        // Remove the curly braces and parse the images
+        images = images.replace(/{|}/g, '').split(',').filter(img => img.trim() !== '');
+    }
+    
     // Format the date
     const modifiedDate = new Date(note.modified_at || note.created_at);
     
-    noteCard.innerHTML = `
-        <div class="note-header">
-            <div class="note-title">${note.title}</div>
-            <i class="fas ${note.is_favorite ? 'fa-heart' : 'fa-heart-crack'} favorite-btn ${note.is_favorite ? 'active' : ''}"></i>
-        </div>
-        <div class="note-content">${getContentPreview(note.content)}</div>
-        ${tags.length > 0 ? `
-            <div class="note-tags">
-                ${tags.map(tag => `<div class="note-tag"><i class="fas fa-tag fa-flip-horizontal"></i> ${tag}</div>`).join('')}
+    // Create different HTML structure depending on note type
+    if (note.note_type === 'memory') {
+        // Memory note card (with images)
+        noteCard.innerHTML = `
+            <div class="note-header">
+                <div class="note-title">${note.title}</div>
+                <i class="fas ${note.is_favorite ? 'fa-heart' : 'fa-heart-crack'} favorite-btn ${note.is_favorite ? 'active' : ''}"></i>
             </div>
-        ` : ''}
-        <div class="note-footer">
-            <div class="note-date"><i class="far fa-clock"></i> ${formatDate(modifiedDate)}</div>
-            <div class="note-actions">
-                <i class="fas fa-share-alt"></i>
-                <i class="fas fa-trash-alt"></i>
+            <div class="note-card-content">
+                ${images.length > 0 ? `
+                    <div class="memory-image-preview">
+                        <img src="${images[0]}" alt="Memory Image">
+                        ${images.length > 1 ? `
+                            <div class="memory-image-count">
+                                <i class="fas fa-images"></i> ${images.length}
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                <div class="memory-content">${getContentPreview(note.content)}</div>
+                ${tags.length > 0 ? `
+                    <div class="note-tags">
+                        ${tags.map(tag => `<div class="note-tag"><i class="fas fa-tag fa-flip-horizontal"></i> ${tag}</div>`).join('')}
+                    </div>
+                ` : ''}
             </div>
-        </div>
-    `;
+            <div class="note-footer">
+                <div class="note-date"><i class="far fa-clock"></i> ${formatDate(modifiedDate)}</div>
+                <div class="note-actions">
+                    <i class="fas fa-share-alt"></i>
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+            </div>
+        `;
+    } else {
+        // Regular text note card
+        noteCard.innerHTML = `
+            <div class="note-header">
+                <div class="note-title">${note.title}</div>
+                <i class="fas ${note.is_favorite ? 'fa-heart' : 'fa-heart-crack'} favorite-btn ${note.is_favorite ? 'active' : ''}"></i>
+            </div>
+            <div class="note-content">${getContentPreview(note.content)}</div>
+            ${tags.length > 0 ? `
+                <div class="note-tags">
+                    ${tags.map(tag => `<div class="note-tag"><i class="fas fa-tag fa-flip-horizontal"></i> ${tag}</div>`).join('')}
+                </div>
+            ` : ''}
+            <div class="note-footer">
+                <div class="note-date"><i class="far fa-clock"></i> ${formatDate(modifiedDate)}</div>
+                <div class="note-actions">
+                    <i class="fas fa-share-alt"></i>
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+            </div>
+        `;
+    }
     
     // Add event listeners
     noteCard.addEventListener('click', () => {
-        // Open note editor (to be implemented)
-        showEditNote(note);
+        // Open the appropriate editor based on note type
+        if (note.note_type === 'memory') {
+            showMemoryEditor(note);
+        } else {
+            showEditNote(note);
+        }
     });
     
     const favoriteBtn = noteCard.querySelector('.favorite-btn');
@@ -749,6 +826,256 @@ function applyFilter(notes) {
     return notes;
 }
 
+// Memory Note Functions
+function showNoteTypeSelection() {
+    // Show the note type selection modal
+    modalBackdrop.classList.remove('hidden');
+    noteTypeModal.classList.add('visible');
+}
+
+function closeNoteTypeModal() {
+    noteTypeModal.classList.remove('visible');
+    modalBackdrop.classList.add('hidden');
+}
+
+function showMemoryEditor(note = null) {
+    // Reset the form and images
+    resetMemoryForm();
+    
+    // Set the modal title
+    memoryModalTitle.textContent = note ? 'Edit Memory' : 'Create Memory';
+    
+    // Store the note ID if editing
+    if (note) {
+        memoryModal.dataset.noteId = note.id;
+        
+        // Populate form with note data
+        memoryTitle.value = note.title || '';
+        memoryContent.value = note.content || '';
+        memoryFavorite.checked = note.is_favorite || false;
+        
+        // Process tags
+        let tags = note.tags || [];
+        if (typeof tags === 'string') {
+            tags = tags.replace(/{|}/g, '').split(',').filter(tag => tag.trim() !== '');
+        }
+        
+        // Add tags to the preview
+        tags.forEach(tag => addMemoryTagToPreview(tag));
+        
+        // Process and display existing images
+        let images = note.images || [];
+        if (typeof images === 'string') {
+            images = images.replace(/{|}/g, '').split(',').filter(img => img.trim() !== '');
+        }
+        
+        // Add existing images to the preview and keep track of them
+        images.forEach(imagePath => {
+            addImagePreview(imagePath);
+        });
+    } else {
+        memoryModal.dataset.noteId = '';
+    }
+    
+    // Show the modal
+    modalBackdrop.classList.remove('hidden');
+    memoryModal.classList.add('visible');
+    
+    // Focus on the title field
+    setTimeout(() => {
+        memoryTitle.focus();
+    }, 300);
+}
+
+function resetMemoryForm() {
+    memoryTitle.value = '';
+    memoryContent.value = '';
+    memoryTags.value = '';
+    memoryFavorite.checked = false;
+    memoryTagsPreview.innerHTML = '';
+    imagesContainer.innerHTML = '';
+    currentImages = [];
+}
+
+function closeMemoryEditor() {
+    memoryModal.classList.remove('visible');
+    modalBackdrop.classList.add('hidden');
+    resetMemoryForm();
+}
+
+function addMemoryTagToPreview(tagText) {
+    if (!tagText || tagText.trim() === '') return;
+    
+    // Check if tag already exists
+    const existingTags = Array.from(memoryTagsPreview.querySelectorAll('.tag')).map(tag => 
+        tag.textContent.replace('close', '').trim()
+    );
+    
+    if (existingTags.includes(tagText.trim())) return;
+    
+    // Create tag element
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.innerHTML = `${tagText} <i class="fas fa-times"></i>`;
+    
+    // Add delete functionality
+    tag.querySelector('i').addEventListener('click', () => {
+        tag.remove();
+    });
+    
+    memoryTagsPreview.appendChild(tag);
+}
+
+function getMemoryTagsFromPreview() {
+    return Array.from(memoryTagsPreview.querySelectorAll('.tag')).map(tag => 
+        tag.textContent.replace('close', '').trim()
+    );
+}
+
+function addImagePreview(imageSrc) {
+    // Create a new image preview element
+    const imagePreview = document.createElement('div');
+    imagePreview.className = 'image-preview';
+    
+    // If it's a file (from input), use createObjectURL
+    // If it's a server path, use directly
+    let imgSrc = imageSrc;
+    if (!(typeof imageSrc === 'string' && (imageSrc.startsWith('/') || imageSrc.startsWith('http')))) {
+        imgSrc = URL.createObjectURL(imageSrc);
+    }
+    
+    imagePreview.innerHTML = `
+        <img src="${imgSrc}" alt="Memory Image">
+        <div class="remove-btn">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    
+    // Add remove button functionality
+    imagePreview.querySelector('.remove-btn').addEventListener('click', () => {
+        // If it's a Blob URL, revoke it to free memory
+        if (imgSrc.startsWith('blob:')) {
+            URL.revokeObjectURL(imgSrc);
+        }
+        
+        // Remove from the currentImages array
+        if (typeof imageSrc === 'string') {
+            currentImages = currentImages.filter(img => img !== imageSrc);
+        } else {
+            currentImages = currentImages.filter(img => img !== imageSrc);
+        }
+        
+        // Remove the image preview element
+        imagePreview.remove();
+    });
+    
+    // Add to the images container
+    imagesContainer.appendChild(imagePreview);
+    
+    // Add to current images array
+    currentImages.push(imageSrc);
+}
+
+async function handleImageUpload(files) {
+    // Process each selected file
+    for (const file of files) {
+        // Check if it's an image
+        if (!file.type.startsWith('image/')) {
+            showSnackbar('Only image files are allowed');
+            continue;
+        }
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showSnackbar('Image too large (max 5MB)');
+            continue;
+        }
+        
+        // Add to the preview
+        addImagePreview(file);
+    }
+}
+
+async function convertImageToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function saveMemory() {
+    const title = memoryTitle.value.trim();
+    const content = memoryContent.value.trim();
+    const isFavorite = memoryFavorite.checked;
+    const tags = getMemoryTagsFromPreview();
+    
+    // Validate form
+    if (!title) {
+        showSnackbar('Please enter a title');
+        return;
+    }
+    
+    if (!content) {
+        showSnackbar('Please add a description');
+        return;
+    }
+    
+    // Show loading indicator
+    const saveBtn = saveMemoryBtn;
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+    
+    try {
+        // Convert file objects to base64 strings
+        const imagePromises = currentImages.map(async image => {
+            // If it's already a string (from server), return as is
+            if (typeof image === 'string') {
+                return image;
+            }
+            
+            // Otherwise convert File to base64
+            return await convertImageToBase64(image);
+        });
+        
+        // Wait for all images to be processed
+        const base64Images = await Promise.all(imagePromises);
+        
+        // Prepare note data
+        const noteData = {
+            title,
+            content,
+            is_favorite: isFavorite,
+            tags,
+            note_type: 'memory',
+            images: base64Images
+        };
+        
+        // Check if we're editing or creating
+        const noteId = memoryModal.dataset.noteId;
+        
+        if (noteId) {
+            // Update existing note
+            await updateNote(noteId, noteData);
+        } else {
+            // Create new memory note
+            await createNote(noteData);
+        }
+        
+        // Close the modal
+        closeMemoryEditor();
+    } catch (error) {
+        console.error('Error saving memory note:', error);
+        showSnackbar('Failed to save memory');
+    } finally {
+        // Restore button state
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
 // Initialize the app
 async function initApp() {
     // Simulating splash screen delay
@@ -765,6 +1092,14 @@ async function initApp() {
     modalBackdrop.addEventListener('click', (e) => {
         if (drawer.classList.contains('visible')) {
             toggleDrawer();
+        } else if (noteTypeModal.classList.contains('visible')) {
+            closeNoteTypeModal();
+        } else if (noteEditorModal.classList.contains('visible')) {
+            closeNoteEditor();
+        } else if (memoryModal.classList.contains('visible')) {
+            closeMemoryEditor();
+        } else if (shoppingListModal.classList.contains('visible')) {
+            closeShoppingList();
         }
     });
     
@@ -778,13 +1113,59 @@ async function initApp() {
     
     // Add note button
     addNoteBtn.addEventListener('click', () => {
+        showNoteTypeSelection();
+    });
+    
+    // Note type selection
+    textNoteOption.addEventListener('click', () => {
+        closeNoteTypeModal();
         showEditNote();
     });
+    
+    memoryNoteOption.addEventListener('click', () => {
+        closeNoteTypeModal();
+        showMemoryEditor();
+    });
+    
+    closeNoteTypeBtn.addEventListener('click', closeNoteTypeModal);
     
     // Note editor modal buttons
     closeModalBtn.addEventListener('click', closeNoteEditor);
     cancelNoteBtn.addEventListener('click', closeNoteEditor);
     saveNoteBtn.addEventListener('click', saveNote);
+    
+    // Memory editor modal buttons
+    closeMemoryBtn.addEventListener('click', closeMemoryEditor);
+    cancelMemoryBtn.addEventListener('click', closeMemoryEditor);
+    saveMemoryBtn.addEventListener('click', saveMemory);
+    
+    // Image upload handling
+    imageUpload.addEventListener('change', () => {
+        handleImageUpload(imageUpload.files);
+        // Reset the input so the same file can be selected again
+        imageUpload.value = '';
+    });
+    
+    // Memory tags input
+    addMemoryTagBtn.addEventListener('click', () => {
+        const tagText = memoryTags.value.trim();
+        if (tagText) {
+            addMemoryTagToPreview(tagText);
+            memoryTags.value = '';
+            memoryTags.focus();
+        }
+    });
+    
+    memoryTags.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const tagText = memoryTags.value.trim();
+            if (tagText) {
+                addMemoryTagToPreview(tagText);
+                memoryTags.value = '';
+            }
+        }
+    });
     
     // Tags input
     addTagBtn.addEventListener('click', () => {
