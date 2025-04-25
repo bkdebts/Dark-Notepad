@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Notepad</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icons/app_icon.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Splash Screen (Initially Visible) -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="app-logo">
+                <i class="material-icons">edit_note</i>
+            </div>
+            <h1>Dark Notepad</h1>
+            <p>Take notes. Anywhere. Anytime.</p>
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Main App (Initially Hidden) -->
+    <div id="app" class="hidden">
+        <!-- App Header -->
+        <header>
+            <button id="menu-btn" class="icon-btn">
+                <i class="material-icons">menu</i>
+            </button>
+            <h1>Notes</h1>
+            <button id="search-btn" class="icon-btn">
+                <i class="material-icons">search</i>
+            </button>
+            <button id="sort-btn" class="icon-btn">
+                <i class="material-icons">sort</i>
+            </button>
+        </header>
+
+        <!-- Drawer Menu (Initially Hidden) -->
+        <div id="drawer" class="drawer hidden">
+            <div class="drawer-header">
+                <div class="drawer-app-logo">
+                    <i class="material-icons">edit_note</i>
+                </div>
+                <div>
+                    <h2>Dark Notepad</h2>
+                    <p>Demo Version</p>
+                </div>
+            </div>
+            <div class="notes-count">
+                <i class="material-icons small">note</i>
+                <span id="notes-count-text">5 Notes</span>
+            </div>
+            <div class="drawer-divider"></div>
+            <div class="drawer-item">
+                <i class="material-icons">home</i>
+                <span>Home</span>
+            </div>
+            <div class="drawer-item">
+                <i class="material-icons">favorite</i>
+                <span>Favorites</span>
+            </div>
+            <div class="drawer-item">
+                <i class="material-icons">tag</i>
+                <span>Tags</span>
+            </div>
+            <div class="drawer-item">
+                <i class="material-icons">settings</i>
+                <span>Settings</span>
+            </div>
+            <div class="drawer-footer">
+                <p>Demo Version 1.0.0</p>
+            </div>
+        </div>
+
+        <!-- Search Box (Initially Hidden) -->
+        <div id="search-box" class="search-box hidden">
+            <i class="material-icons">search</i>
+            <input type="text" id="search-input" placeholder="Search notes...">
+            <button id="close-search-btn" class="icon-btn">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+
+        <!-- Notes Container -->
+        <div id="notes-container">
+            <!-- Note cards will be added here dynamically via JavaScript -->
+        </div>
+
+        <!-- Floating Action Button -->
+        <button id="add-note-btn" class="fab">
+            <i class="material-icons">add</i>
+        </button>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div id="modal-backdrop" class="hidden"></div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

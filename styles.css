@@ -1,0 +1,509 @@
+/* Base Styles and Variables */
+:root {
+    --primary-color: #845EF7;
+    --accent-color: #5C7CFA;
+    --background-color: #121212;
+    --card-color: #1E1E1E;
+    --text-primary-color: #F8F9FA;
+    --text-secondary-color: #ADB5BD;
+    --error-color: #FA5252;
+    --success-color: #51CF66;
+    --warning-color: #FFD43B;
+    --divider-color: #2D2D2D;
+    --icon-color: #CED4DA;
+    --border-radius: 16px;
+    --border-radius-sm: 12px;
+    --transition-speed: 300ms;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary-color);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Splash Screen */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.app-logo {
+    width: 120px;
+    height: 120px;
+    background-color: var(--primary-color);
+    border-radius: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    box-shadow: 0 0 20px rgba(132, 94, 247, 0.3);
+    animation: scale 0.5s ease-out;
+}
+
+.app-logo i {
+    font-size: 60px;
+    color: white;
+}
+
+.splash-content h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.splash-content p {
+    font-size: 16px;
+    color: var(--text-secondary-color);
+    margin-bottom: 48px;
+}
+
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(132, 94, 247, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+/* Main App Styles */
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    display: flex;
+    align-items: center;
+    height: 64px;
+    padding: 0 16px;
+    background-color: var(--background-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+header h1 {
+    flex-grow: 1;
+    font-size: 20px;
+    margin-left: 16px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--text-primary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+}
+
+.icon-btn:hover, .icon-btn:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Drawer */
+.drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 280px;
+    background-color: var(--card-color);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--transition-speed);
+    display: flex;
+    flex-direction: column;
+}
+
+.drawer.visible {
+    transform: translateX(0);
+}
+
+.drawer-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    background-color: var(--background-color);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.drawer-app-logo {
+    width: 48px;
+    height: 48px;
+    background-color: var(--primary-color);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 16px;
+}
+
+.drawer-app-logo i {
+    font-size: 24px;
+    color: white;
+}
+
+.drawer-header h2 {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.drawer-header p {
+    font-size: 14px;
+    color: var(--text-secondary-color);
+}
+
+.notes-count {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-secondary-color);
+}
+
+.notes-count i {
+    margin-right: 8px;
+    font-size: 20px;
+}
+
+.material-icons.small {
+    font-size: 20px;
+}
+
+.drawer-divider {
+    height: 1px;
+    background-color: var(--divider-color);
+    margin: 8px 0;
+}
+
+.drawer-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.drawer-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.drawer-item i {
+    margin-right: 16px;
+}
+
+.drawer-footer {
+    margin-top: auto;
+    padding: 16px;
+    font-size: 12px;
+    color: var(--text-secondary-color);
+}
+
+/* Search Box */
+.search-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 64px;
+    background-color: var(--background-color);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 20;
+}
+
+.search-box i {
+    color: var(--text-secondary-color);
+    margin-right: 16px;
+}
+
+.search-box input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: var(--text-primary-color);
+    font-size: 16px;
+    outline: none;
+}
+
+.search-box input::placeholder {
+    color: var(--text-secondary-color);
+}
+
+/* Notes Container */
+#notes-container {
+    padding: 16px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.note-card {
+    background-color: var(--card-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.note-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.note-card.primary {
+    background-color: var(--primary-color);
+}
+
+.note-header {
+    padding: 16px 16px 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.note-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-right: 8px;
+    flex-grow: 1;
+}
+
+.favorite-btn {
+    color: var(--text-secondary-color);
+    cursor: pointer;
+}
+
+.favorite-btn.active {
+    color: var(--primary-color);
+}
+
+.note-content {
+    padding: 0 16px;
+    color: var(--text-secondary-color);
+    font-size: 14px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.note-tags {
+    padding: 0 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.note-tag {
+    background-color: rgba(132, 94, 247, 0.15);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.note-footer {
+    padding: 8px 16px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note-date {
+    font-size: 12px;
+    color: var(--text-secondary-color);
+}
+
+.note-actions {
+    display: flex;
+}
+
+.note-actions i {
+    color: var(--text-secondary-color);
+    padding: 8px;
+    cursor: pointer;
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(132, 94, 247, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    z-index: 15;
+    animation: scaleIn 0.3s ease-out;
+}
+
+.fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(132, 94, 247, 0.6);
+}
+
+.fab i {
+    font-size: 24px;
+}
+
+/* Modal Backdrop */
+#modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 90;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 80px;
+    color: var(--text-secondary-color);
+    margin-bottom: 16px;
+}
+
+.empty-state h2 {
+    font-size: 20px;
+    color: var(--text-secondary-color);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary-color);
+    font-size: 14px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scale {
+    from { transform: scale(0.8); }
+    to { transform: scale(1); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+/* Snackbar */
+.snackbar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--card-color);
+    color: var(--text-primary-color);
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: fadeInUp 0.3s, fadeOut 0.3s 2.7s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+    .app-logo {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .app-logo i {
+        font-size: 50px;
+    }
+    
+    .drawer {
+        width: 260px;
+    }
+}
