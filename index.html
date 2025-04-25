@@ -195,6 +195,98 @@
         </div>
     </div>
 
+    <!-- Memory Note (SlamBook) Modal -->
+    <div id="memory-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="memory-modal-title">Create Memory</h2>
+                <button id="close-memory-btn" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="memory-title">Title</label>
+                    <input type="text" id="memory-title" placeholder="Memory title" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="memory-images">Images</label>
+                    <div class="memory-images">
+                        <div id="images-container" class="images-container">
+                            <!-- Images will be previewed here -->
+                        </div>
+                        <div class="upload-btn-container">
+                            <label for="image-upload" class="image-upload-btn">
+                                <i class="fas fa-camera"></i>
+                                <span>Add Images</span>
+                            </label>
+                            <input type="file" id="image-upload" accept="image/*" multiple hidden>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="memory-content">Description</label>
+                    <textarea id="memory-content" placeholder="Write about this memory..." rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="memory-tags">Tags</label>
+                    <div class="tags-input-container">
+                        <input type="text" id="memory-tags" placeholder="Add tags (comma separated)">
+                        <button id="add-memory-tag-btn" class="icon-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="memory-tags-preview" class="tags-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="memory-favorite">
+                        <span class="custom-checkbox"></span>
+                        Add to favorites
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-memory-btn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button id="save-memory-btn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Type Selection Modal -->
+    <div id="note-type-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Note</h2>
+                <button id="close-note-type-btn" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="note-type-options">
+                    <div id="text-note-option" class="note-type-option">
+                        <div class="note-type-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="note-type-label">Text Note</div>
+                        <div class="note-type-desc">Create a simple text note</div>
+                    </div>
+                    <div id="memory-note-option" class="note-type-option">
+                        <div class="note-type-icon">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <div class="note-type-label">Memory Note</div>
+                        <div class="note-type-desc">Save a memory with photos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="script.js"></script>
 </body>
