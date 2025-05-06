@@ -60,5 +60,28 @@ Take notes. Anywhere. Anytime.
    ```
 
 ---
+## Screenshots
 
-## ❤️ Made with Love by BK TECQ
+### Dark Notepad Home
+![Dark Notepad Home](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Home.png)
+
+### Dark Notepad Grocery
+![Dark Notepad Grocery](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Grocery.png)
+
+### Dark Notepad Time Capsule
+![Dark Notepad Time Capsule](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Time_Capsule.png)
+
+### Dark Notepad Travel
+![Dark Notepad Travel](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Travel.png)
+
+### Dark Notepad ToDo
+![Dark Notepad ToDo](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-ToDo.png)
+
+### Dark Notepad Expenses
+![Dark Notepad Expenses](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Expences.png)
+
+### Dark Notepad Slam Book
+![Dark Notepad Slam Book](https://github.com/bkdebts/Dark-Notepad/blob/main/Pictures/Dark-Notepad-Slam_Book.png)
+
+---
+## ❤ Made with Love ❤️ by BK TECQ ❤
