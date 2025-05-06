@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../services/auth_service.dart';
 import '../utils/constants.dart';
 import '../utils/theme.dart';
 import 'home_screen.dart';
-import 'auth_screen.dart';
-import 'lock_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -20,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _bounceAnimation;
 
   @override
   void initState() {
@@ -38,10 +36,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
     
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.6, end: 1.15).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeInOut),
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
+      ),
+    );
+    
+    _bounceAnimation = Tween<double>(begin: 1.15, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.7, 1.0, curve: Curves.easeInOut),
       ),
     );
     
@@ -53,31 +58,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(milliseconds: AppConstants.splashDuration));
-    
+    await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
-    
-    final authService = Provider.of<AuthService>(context, listen: false);
-    
-    if (authService.isAppLocked) {
-      // Navigate to lock screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LockScreen()),
-      );
-    } else if (authService.isAuthenticated) {
-      // Navigate to home screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    } else {
-      // Navigate to auth screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthScreen()),
-      );
-    }
   }
 
   @override
@@ -94,70 +80,96 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: AnimatedBuilder(
           animation: _animationController,
           builder: (context, child) {
+            double scale = _scaleAnimation.value;
+            if (_animationController.value > 0.7) {
+              scale = _bounceAnimation.value;
+            }
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // App logo
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primaryColor.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+              child: Stack(
+                children: [
+                  Center(
+                    child: Transform.scale(
+                      scale: scale,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // App logo (enlarged)
+                          Container(
+                            width: 180,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(36),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryColor.withOpacity(0.3),
+                                  blurRadius: 32,
+                                  spreadRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Image.asset(
+                                'assets/icons/DarkNP.png',
+                                width: 140,
+                                height: 140,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          // App name
+                          Text(
+                            'Dark Notepad',
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          // App tagline
+                          Text(
+                            'Take notes. Anywhere. Anytime.',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppTheme.textSecondaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 56),
+                          // Loading indicator
+                          const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.primaryColor,
+                              ),
+                              strokeWidth: 4,
+                            ),
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.edit_note_rounded,
-                          size: 60,
-                          color: Colors.white,
-                        ),
+                    ),
+                  ),
+                  // Footer
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 32,
+                    child: Center(
+                      child: Text(
+                        'Made with Love ❤️ by BK TECQ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                            ) ?? const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                            ),
                       ),
                     ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // App name
-                    Text(
-                      'Dark Notepad',
-                      style: Theme.of(context).textTheme.displayMedium,
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // App tagline
-                    Text(
-                      'Take notes. Anywhere. Anytime.',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 48),
-                    
-                    // Loading indicator
-                    const SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.primaryColor,
-                        ),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },

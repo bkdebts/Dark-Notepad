@@ -1,29 +1,46 @@
-name: dark_notepad
-description: A beautiful cross-platform notepad application with cloud sync and PDF export.
+name: flutter_note_pro
+description: A modern note-taking app built with Flutter.
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  
-  # UI and styling
-  cupertino_icons: ^1.0.5
-  google_fonts: ^4.0.4
-  
-  # Other utilities
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
+  provider: ^6.1.2
+  connectivity_plus: ^5.0.2
+  flutter_local_notifications: ^17.1.2
+  url_launcher: ^6.2.6
+  share_plus: ^11.0.0
+  cupertino_icons: ^1.0.8
+  uuid: ^4.3.1
   intl: ^0.18.1
+  google_fonts: ^6.1.0
+  contacts_service: ^0.6.3
+  image_picker: ^1.0.7
+  video_player: ^2.7.0
+  flutter_svg: ^2.0.10
   
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
   
   assets:
     - assets/icons/
+    - assets/icons/DarkNP.png
+    - assets/icons/grocery-bg.png
+    - assets/icons/travel-bg.png
+    - assets/icons/to-do-bg.png
+    - assets/icons/workout-bg.png
+    - assets/icons/Idea-bg.png
+    - assets/icons/slam-book.jpg
+    - assets/icons/time_capsule.jpg
+    - assets/icons/expences.png

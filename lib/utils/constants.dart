@@ -6,10 +6,12 @@ class AppConstants {
   static const String keyUserEmail = 'user_email';
   static const String keyUserId = 'user_id';
   static const String keyAppLockEnabled = 'app_lock_enabled';
+  static const String keyBiometricEnabled = 'biometric_enabled';
   static const String keyAutoSyncEnabled = 'auto_sync_enabled';
   static const String keyRemindersEnabled = 'reminders_enabled';
   static const String keyCloudSyncEnabled = 'cloud_sync_enabled';
   static const String keyFontSize = 'font_size';
+  static const String keyFontFamily = 'font_family';
   static const String keyLastSyncTime = 'last_sync_time';
   
   // Collection names for Firestore
@@ -49,7 +51,7 @@ class AppConstants {
   
   // Success messages
   static const String successSaveNote = 'Note saved successfully.';
-  static const String successCloudSync = 'Synced with cloud successfully.';
+  static const String successCloudSync = 'Notes synced successfully';
   static const String successPdfExport = 'PDF exported successfully.';
   static const String successSignIn = 'Signed in successfully.';
   static const String successSignUp = 'Account created successfully.';
